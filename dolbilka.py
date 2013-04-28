@@ -32,10 +32,10 @@ def main():
 
     replace_columns = [(opts.userid_profile, 12, "0\t0"), (opts.descriptionid_tokensid, 11, ""),
         (opts.titleid_tokensid, 10, ""), (opts.purchasedkeyword_tokensid, 9, ""), (opts.queryid_tokensid, 8, "")]
-    tools.columns_replacer.replace_columns(training_filepath + ".new", training_filepath, replace_columns)
-    tools.columns_replacer.replace_columns(test_filepath + ".new", test_filepath, replace_columns, 2)
-    training_filepath = training_filepath + ".new"
-    test_filepath = test_filepath + ".new"
+    tools.columns_replacer.replace_columns("result." + training_filepath, training_filepath, replace_columns)
+    tools.columns_replacer.replace_columns("result." + test_filepath, test_filepath, replace_columns, 2)
+    training_filepath = "result." + training_filepath
+    test_filepath = "result." + test_filepath
 
 
 if __name__ == '__main__':
