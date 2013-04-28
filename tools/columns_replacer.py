@@ -20,9 +20,10 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
         not_mathed_ids = set()
         not_mathed_lines = 0
 
-        filepath_copy = replacing_filepath + ".copy"
+        filepath_copy = "copy." + replacing_filepath
+        filepath_new = "new." + replacing_filepath
         os.system("cp %s %s" % (replacing_filepath, filepath_copy))
-        with open(filepath_copy + ".new", "w") as filepath_new:
+        with open(filepath_new, "w") as file_new:
             for line in SmartReader().open(filepath_copy):
                 s = line.strip().split('\t')
                 key = s[column_id - 1 - dindex]
@@ -33,8 +34,8 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
                 else:
                     value = d[key]
                 s[column_id - 1 - dindex] = "\t".join(map(str, [key, value]))
-                print >> filepath_new, "\t".join(map(str, s))
+                print >> file_new, "\t".join(map(str, s))
         os.system("mv %s %s" % (filepath_new, filepath_copy))
         _logger.debug("Not matched uniq ids = %d" % len(not_mathed_ids))
-        _logger.debug("Not matched lines = %d" % len(not_mathed_lines))
+        _logger.debug("Not matched lines = %d" % not_mathed_lines)
     os.system("mv %s %s" % (filepath_copy, result_filepath))
