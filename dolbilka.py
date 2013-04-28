@@ -27,15 +27,12 @@ def main():
     opts, args = optparser.parse_args()
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
-    training_filepath = args[0]
-    test_filepath = args[1]
-
+    training_filepath = "replaced.training.tsv.gz"
+    test_filepath = "replaced.test.tsv.gz"
     replace_columns = [(opts.userid_profile, 12, "0\t0"), (opts.descriptionid_tokensid, 11, ""),
         (opts.titleid_tokensid, 10, ""), (opts.purchasedkeyword_tokensid, 9, ""), (opts.queryid_tokensid, 8, "")]
-    tools.columns_replacer.replace_columns("result." + training_filepath, training_filepath, replace_columns)
-    tools.columns_replacer.replace_columns("result." + test_filepath, test_filepath, replace_columns, 2)
-    training_filepath = "result." + training_filepath
-    test_filepath = "result." + test_filepath
+    tools.columns_replacer.replace_columns(training_filepath, args[0], replace_columns)
+    tools.columns_replacer.replace_columns(test_filepath, args[1], replace_columns, 2)
 
 
 if __name__ == '__main__':
