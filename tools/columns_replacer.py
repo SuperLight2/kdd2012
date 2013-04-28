@@ -1,4 +1,4 @@
-import shutil
+import os
 from smart_reader import SmartReader
 import logging
 
@@ -21,7 +21,7 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
         not_mathed_lines = 0
 
         filepath_copy = replacing_filepath + ".copy"
-        shutil.copy(replacing_filepath, filepath_copy)
+        os.system("cp %s %s" % (replacing_filepath, filepath_copy))
         with open(filepath_copy + ".new", "w") as filepath_new:
             for line in SmartReader().open(filepath_copy):
                 s = line.strip().split('\t')
@@ -34,7 +34,7 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
                     value = d[key]
                 s[column_id - 1 - dindex] = "\t".join(map(str, [key, value]))
                 print >> filepath_new, "\t".join(map(str, s))
-        shutil.move(filepath_new, filepath_copy)
+        os.system("mv %s %s" % (filepath_new, filepath_copy))
         _logger.debug("Not matched uniq ids = %d" % len(not_mathed_ids))
         _logger.debug("Not matched lines = %d" % len(not_mathed_lines))
-    shutil.move(filepath_copy, result_filepath)
+    os.system("mv %s %s" % (filepath_copy, result_filepath))
