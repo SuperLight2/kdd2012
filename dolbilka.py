@@ -30,8 +30,8 @@ def main():
     training_filepath = args[0]
     test_filepath = args[1]
 
-    replace_columns = [(opts.userid_profile, 12), (opts.descriptionid_tokensid, 11),
-        (opts.titleid_tokensid, 10), (opts.purchasedkeyword_tokensid, 9), (opts.queryid_tokensid, 8)]
+    replace_columns = [(opts.userid_profile, 12, "0\t0"), (opts.descriptionid_tokensid, 11, ""),
+        (opts.titleid_tokensid, 10, ""), (opts.purchasedkeyword_tokensid, 9, ""), (opts.queryid_tokensid, 8, "")]
     tools.columns_replacer.replace_columns(training_filepath + ".new", training_filepath, replace_columns)
     tools.columns_replacer.replace_columns(test_filepath + ".new", test_filepath, replace_columns, 2)
     training_filepath = training_filepath + ".new"
