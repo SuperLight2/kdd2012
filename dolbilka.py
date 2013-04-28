@@ -1,8 +1,9 @@
 from optparse import OptionParser
-import shutil
-
-from tools.smart_reader import SmartReader
 import tools.columns_replacer
+import logging
+
+_logger = logging.getLogger(__name__)
+
 
 def main():
     optparser = OptionParser(usage="""
@@ -24,6 +25,7 @@ def main():
             type='string', default='userid_profile.txt',
             help='Path to userid_profile.txt file')
     opts, args = optparser.parse_args()
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
     training_filepath = args[0]
     test_filepath = args[1]
