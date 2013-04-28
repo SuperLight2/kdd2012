@@ -21,8 +21,8 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
         not_mathed_ids = set()
         not_mathed_lines = 0
 
-        filepath_copy = "copy." + replacing_filepath
-        filepath_new = "new." + replacing_filepath
+        filepath_copy = "copy.tmp.file" + replacing_filepath[-3:]
+        filepath_new = "new.tmp.file" + replacing_filepath[-3:]
         os.system("cp %s %s" % (replacing_filepath, filepath_copy))
         with SmartWriter().open(filepath_new) as file_new:
             for line in SmartReader().open(filepath_copy):
