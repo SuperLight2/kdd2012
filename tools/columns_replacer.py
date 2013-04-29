@@ -43,6 +43,6 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
         os.system("mv %s %s" % (filepath_new, filepath_copy))
         _logger.debug("Not matched uniq ids: %d" % len(not_mathed_ids))
         _logger.debug("Not matched lines: %d" % not_mathed_lines)
-    with SmartWriter.open(result_filepath) as result_file:
+    with SmartWriter().open(result_filepath) as result_file:
         for line in SmartReader().open(filepath_copy):
             print >> result_file, "\t".join(["0"] * dindex + [line])
