@@ -8,8 +8,6 @@ class FeatureCalcerClickAndImpression(FeatureCalcer):
         pass
 
     def calc_features(self, instance):
-        _logger.debug(instance)
-
         if instance.clicks == 0:
             return 0
         else:

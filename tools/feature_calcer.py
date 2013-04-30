@@ -1,6 +1,6 @@
 from smart_writer import SmartWriter
-from smart_reader import SmartReader
 from types import ListType
+from readers import InstanceReader
 
 
 class FeatureCalcer(object):
@@ -20,7 +20,7 @@ class FeatureCalcer(object):
         self.calc_statistics()
         for in_filepath, out_filepath in zip([self.training_filepath, self.test_filepath], [self.result_training, self.result_test]):
             with SmartWriter().open(out_filepath) as f_out:
-                for instance in SmartReader().open(in_filepath):
+                for instance in InstanceReader().open(in_filepath):
                     result = self.calc_features(instance)
                     if not isinstance(result, ListType):
                         result = [result]
