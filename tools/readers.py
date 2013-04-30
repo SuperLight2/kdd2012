@@ -24,4 +24,5 @@ class InstanceReader(object):
     def open(self, filename):
         for line in SmartReader().open(filename):
             if not line.strip():
-                yield Instance(line)
+                continue
+            yield Instance(line)
