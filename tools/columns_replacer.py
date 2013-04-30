@@ -46,3 +46,4 @@ def replace_columns(result_filepath, replacing_filepath, replace_columns, dindex
     with SmartWriter().open(result_filepath) as result_file:
         for line in SmartReader().open(filepath_copy):
             print >> result_file, "\t".join(["0"] * dindex + [line])
+    os.system("rm -f %s %s" % (filepath_copy, filepath_new))

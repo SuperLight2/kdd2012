@@ -43,12 +43,6 @@ def main():
     _logger.debug("Replacing columns for test")
     tools.columns_replacer.replace_columns(test_filepath, args[1], replace_columns, 2)
 
-    """for file_to_sort in [training_filepath, test_filepath]:
-        _logger.debug("Sorting %s" % file_to_sort)
-        os.system("gunzip -c %s | sort -nr -k 16,16 -k 8,8 -k 6,6 -k 7,7n | gzip -c > new.%s" % (file_to_sort, file_to_sort))
-        os.system("rm %s" % file_to_sort)
-    training_filepath = "new." + training_filepath
-    test_filepath = "new." + test_filepath"""
 
 if __name__ == '__main__':
     main()

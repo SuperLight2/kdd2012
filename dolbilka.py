@@ -27,7 +27,7 @@ def main():
                            test_prefix + output_filepath)
         for FeatureCalcerClass, output_filepath in [
             (FeatureCalcerClickAndImpression, "features_click_and_impression.tsv"),
-            (FeatureCalcerGeneral, "features_click_and_impression.tsv")]
+            (FeatureCalcerGeneral, "features_general.tsv")]
     ]
 
     train_result_files = []
