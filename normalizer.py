@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 def main():
     optparser = OptionParser(usage="""
         %prog [OPTIONS] training.tsv test.tsv
-        Normalize original files""")
+        Normalize original files """)
     optparser.add_option('-q', '--queryid-tokensid', dest='queryid_tokensid',
         type='string', default='queryid_tokensid.txt',
         help='Path to queryid_tokensid.txt file')
@@ -24,11 +24,17 @@ def main():
     optparser.add_option('-u', '--userid_profile', dest='userid_profile',
             type='string', default='userid_profile.txt',
             help='Path to userid_profile.txt file')
+    optparser.add_option('--result-training', dest='result_training',
+            type='string', default='result.training.tsv.gz',
+            help='Path to normalized training file')
+    optparser.add_option('--result-test', dest='result_test',
+            type='string', default='result.test.tsv.gz',
+            help='Path to normalized test file')
     opts, args = optparser.parse_args()
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
-    training_filepath = "replaced.training.tsv.gz"
-    test_filepath = "replaced.test.tsv.gz"
+    training_filepath = opts.result_training
+    test_filepath = opts.result_test
     replace_columns = [(opts.userid_profile, 12, "0\t0"), (opts.descriptionid_tokensid, 11, ""),
                        (opts.titleid_tokensid, 10, ""), (opts.purchasedkeyword_tokensid, 9, ""),
                        (opts.queryid_tokensid, 8, "")]
