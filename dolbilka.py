@@ -1,19 +1,11 @@
 from optparse import OptionParser
-from tools.shell import join_all_files, calc_script
+from tools.shell import join_all_files
+from tools.feature_calcer_click_and_impression import FeatureCalcerClickAndImpression
+from tools.feature_calcer_general import FeatureCalcerGeneral
+
+
 import logging
 _logger = logging.getLogger(__name__)
-
-
-class FeatureDescriptor(object):
-    def __init__(self, script_filepath, result_filepath, additional_params=None):
-        self.script_filepath = script_filepath
-        self.result_filepath = result_filepath
-        self.additional_params = additional_params
-        if self.additional_params is None:
-            self.additional_params = []
-
-    def add_param(self, param):
-        self.additional_params.append(param)
 
 
 def main():
@@ -26,19 +18,26 @@ def main():
     training_filepath = args[0]
     test_filepath = args[1]
 
-    features_groups = {
-        "click_and_impression": FeatureDescriptor("features_click_and_impression.tsv", "features_click_and_impression.py"),
-        "general": FeatureDescriptor("features_general.tsv", "features_general.py"),
-    }
+    train_prefix = "train_"
+    test_prefix = "test_"
 
-    for prefix, data_filepath in zip(["train_", "test_"], [training_filepath, test_filepath]):
-        result_files = []
-        for group, descriptor in features_groups.iteritems():
-            result_file = prefix + descriptor.result_filepath
-            calc_script(prefix + descriptor.result_filepath, descriptor.script_filepath, data_filepath, descriptor.additional_params)
-            result_files.append(result_file)
-        _logger.debug("Joining %s" % prefix)
-        join_all_files(prefix + "features.tsv", result_files)
+    feature_calcers = [
+        FeatureCalcerClass(training_filepath, test_filepath,
+                           train_prefix + output_filepath,
+                           test_prefix + output_filepath)
+        for FeatureCalcerClass, output_filepath in [
+            (FeatureCalcerClickAndImpression, "features_click_and_impression.tsv"),
+            (FeatureCalcerGeneral, "features_click_and_impression.tsv")]
+    ]
+
+    train_result_files = []
+    test_result_files = []
+    for feature_calcer in feature_calcers:
+        train_result_files.append(feature_calcer.result_training)
+        test_result_files.append(feature_calcer.result_test)
+        feature_calcer.run()
+    join_all_files(train_prefix + "features.tsv", train_result_files)
+    join_all_files(test_prefix + "features.tsv", test_result_files)
 
 
 if __name__ == '__main__':
