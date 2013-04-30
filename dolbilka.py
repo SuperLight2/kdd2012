@@ -2,7 +2,7 @@ from optparse import OptionParser
 from tools.shell import join_all_files
 from tools.feature_calcer_click_and_impression import FeatureCalcerClickAndImpression
 from tools.feature_calcer_general import FeatureCalcerGeneral
-
+from tools.features_calcer_mean_ctr import FeatureCalcerMeanCtr
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -27,12 +27,14 @@ def main():
                            test_prefix + output_filepath)
         for FeatureCalcerClass, output_filepath in [
             (FeatureCalcerClickAndImpression, "features_click_and_impression.tsv"),
-            (FeatureCalcerGeneral, "features_general.tsv")]
+            (FeatureCalcerGeneral, "features_general.tsv"),
+            (FeatureCalcerMeanCtr, "features_mean_ctr.tsv")]
     ]
 
     train_result_files = []
     test_result_files = []
     for feature_calcer in feature_calcers:
+        _logger.debug("Running feature calcer: %s" % feature_calcer.result_training)
         train_result_files.append(feature_calcer.result_training)
         test_result_files.append(feature_calcer.result_test)
         feature_calcer.run()
