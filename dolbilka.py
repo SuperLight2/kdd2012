@@ -28,6 +28,7 @@ def main():
 
     features_groups = {
         "click_and_impression": FeatureDescriptor("features_click_and_impression.tsv", "features_click_and_impression.py"),
+        "general": FeatureDescriptor("features_general.tsv", "features_general.py"),
     }
 
     for prefix, data_filepath in zip(["train_", "test_"], [training_filepath, test_filepath]):
