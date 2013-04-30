@@ -3,6 +3,7 @@ from feature_calcer import FeatureCalcer
 import logging
 _logger = logging.getLogger(__name__)
 
+
 class FeatureCalcerClickAndImpression(FeatureCalcer):
     def calc_statistics(self):
         pass
