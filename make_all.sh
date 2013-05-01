@@ -12,8 +12,3 @@ python normalizer.py ${data_folder}/${original_training} ${data_folder}/${origin
     --result-test result.test.tsv.gz
 
 python dolbilka.py result.training.tsv.gz result.test.tsv.gz
-
-
-
-
-

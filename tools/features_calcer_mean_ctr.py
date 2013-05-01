@@ -6,31 +6,43 @@ _logger = logging.getLogger(__name__)
 
 
 class FeatureCalcerMeanCtr(FeatureCalcer):
-    def calc_statistics(self):
-        self.userID2ctr = {}
-        self.adID2ctr = {}
-        for instance in InstanceReader().open(self.training_filepath):
-            if instance.userID not in self.userID2ctr:
-                self.userID2ctr[instance.userID] = [0, 0]
-            self.userID2ctr[instance.userID][0] += instance.clicks
-            self.userID2ctr[instance.userID][1] += instance.impressions
-            if instance.adID not in self.adID2ctr:
-                self.adID2ctr[instance.adID] = [0, 0]
-            self.adID2ctr[instance.adID][0] += instance.clicks
-            self.adID2ctr[instance.adID][1] += instance.impressions
+    ATTRIBUTES = ["userID", "adID", "advertiserID", "depth", "position", "queryID", "keywordID", "titleID",
+                  "descriptionID", "userID", "user_gender", "user_age"]
 
-    def calc_ctr(self, clicks, impressions):
-        return 0 if clicks == 0 else 1.0 * clicks / impressions
+    def calc_statistics(self):
+        all_clicks = 0
+        all_impressions = 0
+        self.attr2ctr = {}
+
+        for instance in InstanceReader().open(self.training_filepath):
+            all_clicks += instance.clicks
+            all_impressions += instance.impressions
+
+            for attribute in FeatureCalcerMeanCtr.ATTRIBUTES:
+                if attribute not in self.attr2ctr:
+                    self.attr2ctr[attribute] = {}
+
+                attribute_value = getattr(instance, attribute)
+                if attribute_value not in self.attr2ctr[attribute]:
+                    self.attr2ctr[attribute][attribute_value] = [0, 0]
+                self.attr2ctr[attribute][attribute_value][0] += instance.clicks
+                self.attr2ctr[attribute][attribute_value][1] += instance.impression
+        self.mean_ctr = 1.0 * all_clicks / all_impressions
+
+    def calc_ctr(self, clicks, impressions, a=0, b=0):
+        return self.mean_ctr if (impressions + b) == 0 else 1.0 * (clicks + a * b) / (impressions + b)
 
     def calc_features(self, instance):
         results = []
 
-        if instance.userID not in self.userID2ctr:
-            self.userID2ctr[instance.userID] = [0, 0]
-        results.append(self.calc_ctr(self.userID2ctr[instance.userID][0], self.userID2ctr[instance.userID][1]))
-
-        if instance.adID not in self.adID2ctr:
-            self.adID2ctr[instance.adID] = [0, 0]
-        results.append(self.calc_ctr(self.adID2ctr[instance.adID][0], self.adID2ctr[instance.adID][1]))
-
+        for attribute in FeatureCalcerMeanCtr.ATTRIBUTES:
+            attribute_value = getattr(instance, attribute)
+            if attribute_value not in self.attr2ctr[attribute]:
+                results.append(self.mean_ctr)
+                results.append(self.mean_ctr)
+                continue
+            clicks = self.attr2ctr[attribute][attribute_value][0]
+            impressions = self.attr2ctr[attribute][attribute_value][1]
+            results.append(self.calc_ctr(clicks, impressions))
+            results.append(self.calc_ctr(clicks, impressions, 0.05, 75))
         return results
