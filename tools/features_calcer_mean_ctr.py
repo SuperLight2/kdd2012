@@ -26,7 +26,7 @@ class FeatureCalcerMeanCtr(FeatureCalcer):
                 if attribute_value not in self.attr2ctr[attribute]:
                     self.attr2ctr[attribute][attribute_value] = [0, 0]
                 self.attr2ctr[attribute][attribute_value][0] += instance.clicks
-                self.attr2ctr[attribute][attribute_value][1] += instance.impression
+                self.attr2ctr[attribute][attribute_value][1] += instance.impressions
         self.mean_ctr = 1.0 * all_clicks / all_impressions
 
     def calc_ctr(self, clicks, impressions, a=0, b=0):
