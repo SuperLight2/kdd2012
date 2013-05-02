@@ -1,13 +1,21 @@
 from feature_calcer import FeatureCalcer
 from readers import InstanceReader
+from tools import gcd
 
 import logging
 _logger = logging.getLogger(__name__)
 
 
+def depth_position_attribute(depth, position):
+    g = gcd(depth - position, position)
+    return (depth - position) / g, position / g
+
+
 class FeatureCalcerMeanCtr(FeatureCalcer):
     ATTRIBUTES = ["userID", "adID", "advertiserID", "depth", "position", "queryID", "keywordID", "titleID",
                   "descriptionID", "userID", "user_gender", "user_age"]
+    FUNCTIONS = [(attribute, lambda instance, attr: getattr(instance, attr)) for attribute in ATTRIBUTES]
+    FUNCTIONS.append(("depth-position", lambda instance, _: depth_position_attribute(instance.depth, instance.position)))
 
     def calc_statistics(self):
         all_clicks = 0
@@ -18,11 +26,11 @@ class FeatureCalcerMeanCtr(FeatureCalcer):
             all_clicks += instance.clicks
             all_impressions += instance.impressions
 
-            for attribute in FeatureCalcerMeanCtr.ATTRIBUTES:
+            for attribute, function in FeatureCalcerMeanCtr.FUNCTIONS:
                 if attribute not in self.attr2ctr:
                     self.attr2ctr[attribute] = {}
 
-                attribute_value = getattr(instance, attribute)
+                attribute_value = function(instance, attribute)
                 if attribute_value not in self.attr2ctr[attribute]:
                     self.attr2ctr[attribute][attribute_value] = [0, 0]
                 self.attr2ctr[attribute][attribute_value][0] += instance.clicks
@@ -35,14 +43,13 @@ class FeatureCalcerMeanCtr(FeatureCalcer):
     def calc_features(self, instance):
         results = []
 
-        for attribute in FeatureCalcerMeanCtr.ATTRIBUTES:
-            attribute_value = getattr(instance, attribute)
+        for attribute, function in FeatureCalcerMeanCtr.FUNCTIONS:
+            attribute_value = function(instance, attribute)
             if attribute_value not in self.attr2ctr[attribute]:
                 results.append(self.mean_ctr)
                 results.append(self.mean_ctr)
                 continue
-            clicks = self.attr2ctr[attribute][attribute_value][0]
-            impressions = self.attr2ctr[attribute][attribute_value][1]
+            clicks, impressions = self.attr2ctr[attribute][attribute_value]
             results.append(self.calc_ctr(clicks, impressions))
             results.append(self.calc_ctr(clicks, impressions, 0.05, 75))
         return results
