@@ -49,8 +49,8 @@ class FeatureCalcerTokenator(FeatureCalcer):
                         word2count[word] += 1
                         total_words += 1
         start = 5 * len(word2count) / 100
-        count = [(word, 1.0 * word_count / total_words) for word, word_count in word2count.iteritems()].sort(
-            key=lambda x: -x[1])
+        count = sorted([(word, 1.0 * word_count / total_words) for word, word_count in word2count.iteritems()],
+                       key=lambda x: (-x[1], x[0]))
         self.markers = random.sample(count[start:start + 500], 100)
 
         self.hash2prob = dict()
