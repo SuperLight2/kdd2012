@@ -61,11 +61,6 @@ class FeatureCalcerTokenator(FeatureCalcer):
         self.hash2title_idf = dict()
         self.hash2keyword_idf = dict()
         self.hash2description_idf = dict()
-        for word, _ in self.markers:
-            self.hash2query_idf[word] = 0
-            self.hash2title_idf[word] = 0
-            self.hash2keyword_idf[word] = 0
-            self.hash2description_idf[word] = 0
 
         instances_count = 0
         self.support_instances = []
@@ -82,6 +77,8 @@ class FeatureCalcerTokenator(FeatureCalcer):
                                              (instance.keyword_tokens, self.hash2keyword_idf),
                                              (instance.description_tokens, self.hash2description_idf)]:
                         if marker_word in tokens:
+                            if marker_word not in hash2idf:
+                                hash2idf[marker_word] = 0
                             hash2idf[marker_word] += 1.0
         for word, _ in self.markers:
             self.hash2query_idf[word] = math.log(instances_count / self.hash2query_idf[word])
