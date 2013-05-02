@@ -81,10 +81,14 @@ class FeatureCalcerTokenator(FeatureCalcer):
                                 hash2idf[marker_word] = 0
                             hash2idf[marker_word] += 1.0
         for word, _ in self.markers:
-            self.hash2query_idf[word] = math.log(instances_count / self.hash2query_idf[word])
-            self.hash2title_idf[word] = math.log(instances_count / self.hash2title_idf[word])
-            self.hash2keyword_idf[word] = math.log(instances_count / self.hash2keyword_idf[word])
-            self.hash2description_idf[word] = math.log(instances_count / self.hash2description_idf[word])
+            if word in self.hash2query_idf:
+                self.hash2query_idf[word] = math.log(instances_count / self.hash2query_idf[word])
+            if word in self.hash2title_idf:
+                self.hash2title_idf[word] = math.log(instances_count / self.hash2title_idf[word])
+            if word in self.hash2keyword_idf:
+                self.hash2keyword_idf[word] = math.log(instances_count / self.hash2keyword_idf[word])
+            if word in self.hash2description_idf:
+                self.hash2description_idf[word] = math.log(instances_count / self.hash2description_idf[word])
 
     def calc_features(self, instance):
         vectors = self.get_instance_vectors(instance)
