@@ -6,19 +6,17 @@ import math
 
 class FeatureCalcerTokenator(FeatureCalcer):
     def add_to_count(self, count, tokens):
-        words = tokens.strip().split('|')
-        for word in words:
+        for word in tokens:
             if word not in count:
                 count[word] = 0
             count[word] += 1
 
     def calc_tf(self, word, tokens):
-        words = tokens.strip.split('|')
         count = 0
-        for w in words:
+        for w in tokens:
             if word == w:
                 count += 1
-        return 1.0 * count / len(words)
+        return 1.0 * count / len(tokens)
 
     def calc_tfidf(self, word, tokens, hash2idf):
         if word not in hash2idf:
@@ -42,7 +40,7 @@ class FeatureCalcerTokenator(FeatureCalcer):
     def get_tf_idf_vector(self, tokens, hash2idf):
         result = []
         for marker_word in self.markers:
-            result.append(marker_word, tokens, hash2idf)
+            result.append(self.calc_tfidf(marker_word, tokens, hash2idf))
         return result
 
     def get_tf_idf_vectors(self, instance):
@@ -91,7 +89,7 @@ class FeatureCalcerTokenator(FeatureCalcer):
             for instance in InstanceReader().open(filepath):
                 if instance.clicks > 100:
                     if len(self.support_instances) == 10:
-                        self.support_instances[random.randint(10)] = self.support_instances[-1]
+                        self.support_instances[random.randint(0, 10)] = self.support_instances[-1]
                     self.support_instances.append(instance)
                 instancesCount += 1
                 for marker_word, _ in self.markers:
@@ -99,7 +97,7 @@ class FeatureCalcerTokenator(FeatureCalcer):
                                              (instance.title_tokens, self.hash2title_idf),
                                              (instance.keyword_tokens, self.hash2keyword_idf),
                                              (instance.description_tokens, self.hash2description_idf)]:
-                        if marker_word in tokens.strip().split('|'):
+                        if marker_word in tokens:
                             hash2idf[marker_word] += 1.0
         for word, _ in self.markers:
             self.hash2query_idf[word] /= instancesCount
