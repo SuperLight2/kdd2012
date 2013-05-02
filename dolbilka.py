@@ -3,6 +3,7 @@ from tools.shell import join_all_files
 from tools.feature_calcer_click_and_impression import FeatureCalcerClickAndImpression
 from tools.feature_calcer_general import FeatureCalcerGeneral
 from tools.features_calcer_mean_ctr import FeatureCalcerMeanCtr
+from tools.features_calcer_tokenator import FeatureCalcerTokenator
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -28,7 +29,8 @@ def main():
         for FeatureCalcerClass, output_filepath in [
             (FeatureCalcerClickAndImpression, "features_click_and_impression.tsv"),
             (FeatureCalcerGeneral, "features_general.tsv"),
-            (FeatureCalcerMeanCtr, "features_mean_ctr.tsv")]
+            (FeatureCalcerMeanCtr, "features_mean_ctr.tsv"),
+            (FeatureCalcerTokenator, "features_tokenator.tsv")]
     ]
 
     train_result_files = []
