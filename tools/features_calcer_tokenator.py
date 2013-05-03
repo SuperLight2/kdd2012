@@ -68,7 +68,7 @@ class FeatureCalcerTokenator(FeatureCalcer):
             for instance in InstanceReader().open(filepath):
                 if instance.clicks > 100:
                     if len(self.support_instances) == 10:
-                        self.support_instances[random.randint(0, 10)] = self.support_instances.pop(-1)
+                        self.support_instances[random.randint(0, 9)] = self.support_instances.pop(-1)
                     self.support_instances.append(instance)
                 instances_count += 1
                 for marker_word, _ in self.markers:
