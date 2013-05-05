@@ -26,3 +26,17 @@ def cosine(vector1, vector2):
     result /= norm(vector1)
     result /= norm(vector2)
     return result
+
+
+def calc_tf(word, tokens):
+    count = 0
+    for w in tokens:
+        if word == w:
+            count += 1
+    return 1.0 * count / len(tokens)
+
+
+def calc_tf_idf(word, tokens, hash2idf):
+    if word not in hash2idf:
+        return 0
+    return calc_tf(word, tokens) * hash2idf[word]
