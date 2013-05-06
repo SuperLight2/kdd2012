@@ -99,7 +99,11 @@ class FeatureCalcerTokenatorLight(FeatureCalcer):
         return result
 
     def get_instance_vectors(self, instance):
-        return self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2idf)
+        query_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2idf)
+        title_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2idf)
+        keyword_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2idf)
+        description_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2idf)
+        return query_vector, title_vector, keyword_vector, description_vector
 
     def calc_statistics(self):
         word2count = dict()
