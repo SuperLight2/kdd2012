@@ -8,15 +8,15 @@ import math
 class FeatureCalcerTokenator(FeatureCalcer):
     def get_markers_tf_idf_vector(self, tokens, hash2idf):
         result = []
-        for marker_word in self.markers:
+        for marker_word, _ in self.markers:
             result.append(calc_tf_idf(marker_word, tokens, hash2idf))
         return result
 
     def get_instance_vectors(self, instance):
         query_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2query_idf)
-        title_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2title_idf)
-        keyword_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2keyword_idf)
-        description_vector = self.get_markers_tf_idf_vector(instance.query_tokens, self.hash2description_idf)
+        title_vector = self.get_markers_tf_idf_vector(instance.title_tokens, self.hash2title_idf)
+        keyword_vector = self.get_markers_tf_idf_vector(instance.keyword_tokens, self.hash2keyword_idf)
+        description_vector = self.get_markers_tf_idf_vector(instance.description_tokens, self.hash2description_idf)
         return query_vector, title_vector, keyword_vector, description_vector
 
     def get_instaces_similarity(self, instance1, instance2):
