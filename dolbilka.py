@@ -3,7 +3,7 @@ from tools.shell import join_all_files
 from tools.feature_calcer_click_and_impression import FeatureCalcerClickAndImpression
 from tools.feature_calcer_general import FeatureCalcerGeneral
 from tools.features_calcer_mean_ctr import FeatureCalcerMeanCtr
-from tools.features_calcer_tokenator import FeatureCalcerTokenator, FeatureCalcerTokenatorLight
+from tools.features_calcer_tokenator import FeatureCalcerTokenator
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -30,17 +30,18 @@ def main():
             (FeatureCalcerClickAndImpression, "features_click_and_impression.tsv"),
             (FeatureCalcerGeneral, "features_general.tsv"),
             (FeatureCalcerMeanCtr, "features_mean_ctr.tsv"),
-            (FeatureCalcerTokenator, "features_tokenator.tsv"),
-            (FeatureCalcerTokenatorLight, "features_tokenator_light.tsv")]
+            (FeatureCalcerTokenator, "features_tokenator.tsv")]
     ]
 
     train_result_files = []
     test_result_files = []
-    for feature_calcer in feature_calcers:
-        _logger.debug("Running feature calcer: %s" % feature_calcer.result_training)
-        train_result_files.append(feature_calcer.result_training)
-        test_result_files.append(feature_calcer.result_test)
-        feature_calcer.run()
+    with open("description.tsv", "w") as description_file:
+        for feature_calcer in feature_calcers:
+            _logger.debug("Running feature calcer: %s" % feature_calcer.result_training)
+            train_result_files.append(feature_calcer.result_training)
+            test_result_files.append(feature_calcer.result_test)
+            feature_calcer.run()
+            print >> description_file, "\n".join(map(str, feature_calcer.get_description()))
     join_all_files(train_prefix + "features.tsv", train_result_files)
     join_all_files(test_prefix + "features.tsv", test_result_files)
 

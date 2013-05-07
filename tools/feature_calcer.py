@@ -10,6 +10,13 @@ class FeatureCalcer(object):
         self.result_training = result_training
         self.result_test = result_test
 
+    def get_description(self):
+        description = self.calc_features.__doc__
+        if description is None:
+            description = ""
+        description = [s.strip() for s in description.strip().split('\n')]
+        return description
+
     def calc_statistics(self):
         raise BaseException("Unimplemented statistics function")
 

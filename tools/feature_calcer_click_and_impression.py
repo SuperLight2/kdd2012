@@ -9,6 +9,9 @@ class FeatureCalcerClickAndImpression(FeatureCalcer):
         pass
 
     def calc_features(self, instance):
+        """
+        clicks / impression
+        """
         if instance.clicks == 0:
             return 0
         else:
