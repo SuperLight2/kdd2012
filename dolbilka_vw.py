@@ -17,7 +17,7 @@ def main():
     train_filepath = args[0]
     test_filepath = args[1]
 
-    ATTRIBUTES = ["adID", "advertiserID", "depth", "position", "queryID", "keywordID", "titleID",
+    ATTRIBUTES = ["adID", "advertiserID", "displayURL", "depth", "position", "queryID", "keywordID", "titleID",
                   "descriptionID", "userID", "user_gender", "user_age", "query_tokens", "title_tokens",
                   "keyword_tokens", "description_tokens"]
     _logger.debug("Calcing max attribute values")
@@ -34,8 +34,8 @@ def main():
                     max_attribute_value[attribute] = max(int(value), max_attribute_value[attribute])
 
     _logger.debug("Making result files")
-    for filepath, result_filepath in [(train_filepath, "train_vw_features.tsv"),
-                                      (test_filepath, "test_vw_features.tsv")]:
+    for filepath, result_filepath in [(train_filepath, "train_vw_features.tsv.gz"),
+                                      (test_filepath, "test_vw_features.tsv.gz")]:
         with SmartWriter().open(result_filepath) as result_file:
             for instance in InstanceReader().open(filepath):
                 class_type = "-1"
