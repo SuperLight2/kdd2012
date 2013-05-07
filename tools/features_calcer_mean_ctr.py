@@ -12,7 +12,7 @@ def depth_position_attribute(depth, position):
 
 
 class FeatureCalcerMeanCtr(FeatureCalcer):
-    ATTRIBUTES = ["userID", "adID", "advertiserID", "depth", "position", "queryID", "keywordID", "titleID",
+    ATTRIBUTES = ["adID", "advertiserID", "depth", "position", "queryID", "keywordID", "titleID",
                   "descriptionID", "userID", "user_gender", "user_age"]
     FUNCTIONS = [(attribute, lambda instance, attr: getattr(instance, attr)) for attribute in ATTRIBUTES]
     FUNCTIONS.append(("depth-position", lambda instance, _: depth_position_attribute(instance.depth, instance.position)))
@@ -42,32 +42,42 @@ class FeatureCalcerMeanCtr(FeatureCalcer):
 
     def calc_features(self, instance):
         """
-        userID categorical ctr
-        userID categorical ctr for a=0.08 b=75
         adID categorical ctr
         adID categorical ctr for a=0.08 b=75
+        adID categorical impressions
         advertiserID categorical ctr
         advertiserID categorical ctr for a=0.08 b=75
+        advertiserID categorical impressions
         depth categorical ctr
         depth categorical ctr for a=0.08 b=75
+        depth categorical impressions
         position categorical ctr
         position categorical ctr for a=0.08 b=75
+        position categorical impressions
         queryID categorical ctr
         queryID categorical ctr for a=0.08 b=75
+        queryID categorical impressions
         keywordID categorical ctr
         keywordID categorical ctr for a=0.08 b=75
+        keywordID categorical impressions
         titleID categorical ctr
         titleID categorical ctr for a=0.08 b=75
+        titleID categorical impressions
         descriptionID categorical ctr
         descriptionID categorical ctr for a=0.08 b=75
+        descriptionID categorical impressions
         userID categorical ctr
         userID categorical ctr for a=0.08 b=75
+        userID categorical impressions
         user_gender categorical ctr
         user_gender categorical ctr for a=0.08 b=75
+        user_gender categorical impressions
         user_age categorical ctr
         user_age categorical ctr for a=0.08 b=75
+        user_age categorical impressions
         depth-position categorical ctr
         depth-position categorical ctr for a=0.08 b=75
+        depth-position categorical impressions
         """
         results = []
 
@@ -76,8 +86,10 @@ class FeatureCalcerMeanCtr(FeatureCalcer):
             if attribute_value not in self.attr2ctr[attribute]:
                 results.append(self.mean_ctr)
                 results.append(self.mean_ctr)
+                results.append(0)
                 continue
             clicks, impressions = self.attr2ctr[attribute][attribute_value]
             results.append(self.calc_ctr(clicks, impressions))
-            results.append(self.calc_ctr(clicks, impressions, 0.05, 75))
+            results.append(self.calc_ctr(clicks, impressions, 0.08, 75))
+            results.append(impressions)
         return results
