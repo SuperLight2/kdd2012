@@ -1,59 +1,58 @@
-import sys
 from optparse import OptionParser
+from tools.readers import InstanceReader
+from types import ListType
+from tools.smart_writer import SmartWriter
+
+import logging
+_logger = logging.getLogger(__name__)
+
 
 def main():
-    
     optparser = OptionParser(usage="""
-            %prog TOKENS_FILE TRAIN_FILE""")
+        %prog [OPTIONS] training.tsv test.tsv
+        Building features pool""")
     opts, args = optparser.parse_args()
-    
-    tokens_dict = dict()
-    
-    token_file = open(args[0])
-    train_file = open(args[1])
-    
-    index = 1
-    for tok in token_file:
-        tokens_dict[int(tok.strip())] = index
-        index = index + 1
-    
-    columns_with_tokens = [8, 10, 12, 14]
-    
-    index = 0
-    for line in train_file:
-        
-        if not line.strip():
-            continue
-        
-        features = line.strip().split('\t')
-        
-        tokens_in_line = []
-        
-        for col in columns_with_tokens:
-            tokens_in_col = features[col].strip().split('|')
-            for tok in tokens_in_col:
-                tokens_in_line.append(int(tok))
-        
-        unical_tokens_in_line = dict()
-            
-        for tok in tokens_in_line:
-            if tok not in unical_tokens_in_line:
-                unical_tokens_in_line[tok] = 1
-            else:
-                unical_tokens_in_line[tok] = unical_tokens_in_line[tok] + 1
-        
-        s = ""
-        for tok in unical_tokens_in_line:
-            s += " %s:%s" % (tokens_dict[tok], unical_tokens_in_line[tok])
-        
-        if features[0] == "0":
-            features[0] = -1
-        else:
-            features[0] = 1
-        
-        print "%s |%s" % (int(features[0]), s)
-        
-        index = index + 1
+    logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+
+    train_filepath = args[0]
+    test_filepath = args[1]
+
+    ATTRIBUTES = ["adID", "advertiserID", "displayURL", "depth", "position", "queryID", "keywordID", "titleID",
+                  "descriptionID", "userID", "user_gender", "user_age", "query_tokens", "title_tokens",
+                  "keyword_tokens", "description_tokens"]
+    _logger.debug("Calcing max attribute values")
+    max_attribute_value = dict()
+    for filepath in [train_filepath, test_filepath]:
+        for instance in InstanceReader().open(filepath):
+            for attribute in ATTRIBUTES:
+                if attribute not in max_attribute_value:
+                    max_attribute_value[attribute] = 0
+                attribute_value = getattr(instance, attribute)
+                if not isinstance(attribute_value, ListType):
+                    attribute_value = [attribute_value]
+                for value in attribute_value:
+                    max_attribute_value[attribute] = max(int(value), max_attribute_value[attribute])
+
+    _logger.debug("Making result files")
+    for filepath, result_filepath in [(train_filepath, "train_vw_features.tsv.gz"),
+                                      (test_filepath, "test_vw_features.tsv.gz")]:
+        with SmartWriter().open(result_filepath) as result_file:
+            for instance in InstanceReader().open(filepath):
+                class_type = "-1"
+                if instance.clicks:
+                    class_type = "1"
+
+                shift = 0
+                result_string = class_type + " |"
+                for attribute in ATTRIBUTES:
+                    attribute_value = getattr(instance, attribute)
+                    if not isinstance(attribute_value, ListType):
+                        attribute_value = [attribute_value]
+                    for value in attribute_value:
+                        result_string += " %s:1" % str(int(value) + shift)
+                    shift += max_attribute_value[attribute] + 1
+                print >> result_file, result_string
+            result_file.close()
 
 if __name__ == "__main__":
     main()
