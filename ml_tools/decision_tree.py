@@ -1,9 +1,11 @@
+import pickle
+
 NON_TERMINAL_NODE = '1'
 REGRESSION_NODE = '2'
 CLASSIFICATION_NODE = '3'
 
 
-class DesicionTree(object):
+class DecisionTree(object):
     END_INFO = "END_INFO"
 
     class Node(object):
@@ -24,7 +26,7 @@ class DesicionTree(object):
             return features[self.feature_index] < self.split_threshold
 
         def serialize_to_string(self):
-            result = DesicionTree.Node.BEGIN_NODE
+            result = DecisionTree.Node.BEGIN_NODE
             result += "\nself_infex\t%s" % str(self.self_index)
             result += "\nnode_type\t%s" % str(self.node_type)
             result += "\nleft_child\t%s" % str(self.left_child)
@@ -35,7 +37,7 @@ class DesicionTree(object):
             result += "\nclass_probabilities\t%s" % str(",".join(map(str, ["%s:%s" % (str(key), str(value))
                                                                            for key, value in
                                                                            self.class_probabilities.iteritems()])))
-            result += "\n" + DesicionTree.Node.END_NODE
+            result += "\n" + DecisionTree.Node.END_NODE
             return result
 
         @classmethod
@@ -45,9 +47,9 @@ class DesicionTree(object):
                 line = line.strip()
                 if not line:
                     continue
-                if line == DesicionTree.Node.BEGIN_NODE:
-                    current_node = DesicionTree.Node(0)
-                elif line == DesicionTree.Node.END_NODE:
+                if line == DecisionTree.Node.BEGIN_NODE:
+                    current_node = DecisionTree.Node(0)
+                elif line == DecisionTree.Node.END_NODE:
                     return current_node
                 elif line == "class_probabilities":
                     _, dictionary = line.strip('\t')
@@ -64,7 +66,7 @@ class DesicionTree(object):
                         setattr(current_node, key, float(value))
 
     def __init__(self):
-        self.nodes = [DesicionTree.Node(0)]
+        self.nodes = [DecisionTree.Node(0)]
         self.info = dict()
 
     def set_property(self, key, value):
@@ -74,18 +76,18 @@ class DesicionTree(object):
         f_out = open(filepath, 'w')
         for key, value in self.info.iteritems():
             print >> f_out, "%s\t%s" % (key, value)
-        print >> f_out, DesicionTree.END_INFO
+        print >> f_out, DecisionTree.END_INFO
         for node in self.nodes:
             print >> f_out, node.serialize_to_string()
 
     def load_from_file(self, filepath):
         f_in = open(filepath)
         for line in f_in:
-            if line == DesicionTree.END_INFO:
+            if line == DecisionTree.END_INFO:
                 break
         self.nodes = []
         while True:
-            current_node = DesicionTree.Node.serilize_from_file(f_in)
+            current_node = DecisionTree.Node.serilize_from_file(f_in)
             if current_node is None:
                 break
             self.nodes.append(current_node)
