@@ -1,73 +1,38 @@
 import pickle
-
-NON_TERMINAL_NODE = '1'
-REGRESSION_NODE = '2'
-CLASSIFICATION_NODE = '3'
-
+from node import Node
 
 class DecisionTree(object):
+    def __init__(self):
+        self.nodes = [Node()]
+        self.info = dict()
+
+    """
     END_INFO = "END_INFO"
 
-    class Node(object):
-        BEGIN_NODE = 'BEGIN_NODE'
-        END_NODE = 'END_NODE'
-
-        def __init__(self, index, node_type=NON_TERMINAL_NODE):
-            self.self_index = index
-            self.node_type = node_type
-            self.left_child = None
-            self.right_child = None
-            self.feature_index = None
-            self.split_threshold = None
-            self.value = None
-            self.class_probabilities = dict()
-
-        def is_in_condition(self, features):
-            return features[self.feature_index] < self.split_threshold
-
-        def serialize_to_string(self):
-            result = DecisionTree.Node.BEGIN_NODE
-            result += "\nself_infex\t%s" % str(self.self_index)
-            result += "\nnode_type\t%s" % str(self.node_type)
-            result += "\nleft_child\t%s" % str(self.left_child)
-            result += "\nright_child\t%s" % str(self.right_child)
-            result += "\nfeature_index\t%s" % str(self.feature_index)
-            result += "\nsplit_threshold\t%s" % str(self.split_threshold)
-            result += "\nvalue\t%s" % str(self.value)
-            result += "\nclass_probabilities\t%s" % str(",".join(map(str, ["%s:%s" % (str(key), str(value))
-                                                                           for key, value in
-                                                                           self.class_probabilities.iteritems()])))
-            result += "\n" + DecisionTree.Node.END_NODE
-            return result
-
-        @classmethod
-        def serilize_from_file(cls, opened_file):
-            current_node = None
-            for line in opened_file:
-                line = line.strip()
-                if not line:
-                    continue
-                if line == DecisionTree.Node.BEGIN_NODE:
-                    current_node = DecisionTree.Node(0)
-                elif line == DecisionTree.Node.END_NODE:
-                    return current_node
-                elif line == "class_probabilities":
-                    _, dictionary = line.strip('\t')
-                    dictionary = dictionary.strip(',')
-                    for word in dictionary:
-                        key, value = word.strip().split(':')
-                        current_node.class_probabilities[int(key)] = float(value)
-                else:
-                    key, value = line.split('\t')
-                    setattr(current_node, key, value)
-                    if key in ['self_index', 'left_child', 'right_child', 'feature_index']:
-                        setattr(current_node, key, int(value))
-                    if key in ['split_threshold', 'value']:
-                        setattr(current_node, key, float(value))
-
-    def __init__(self):
-        self.nodes = [DecisionTree.Node(0)]
-        self.info = dict()
+    @classmethod
+    def serilize_from_file(cls, opened_file):
+        current_node = None
+        for line in opened_file:
+            line = line.strip()
+            if not line:
+                continue
+            if line == DecisionTree.Node.BEGIN_NODE:
+                current_node = DecisionTree.Node(0)
+            elif line == DecisionTree.Node.END_NODE:
+                return current_node
+            elif line == "class_probabilities":
+                _, dictionary = line.strip('\t')
+                dictionary = dictionary.strip(',')
+                for word in dictionary:
+                    key, value = word.strip().split(':')
+                    current_node.class_probabilities[int(key)] = float(value)
+            else:
+                key, value = line.split('\t')
+                setattr(current_node, key, value)
+                if key in ['left_child', 'right_child', 'feature_index']:
+                    setattr(current_node, key, int(value))
+                if key in ['split_threshold', 'value']:
+                    setattr(current_node, key, float(value))
 
     def set_property(self, key, value):
         self.info[key] = value
@@ -91,27 +56,55 @@ class DecisionTree(object):
             if current_node is None:
                 break
             self.nodes.append(current_node)
-        self.nodes.sort(key=lambda node: int(node.self_index))
+        self.nodes.sort(key=lambda node: int(node.self_index))"""
 
     def split_node(self, node_index, feature_index, split_threshold):
         self.nodes[node_index].feature_index = feature_index
         self.nodes[node_index].split_threshold = split_threshold
+        self.nodes[node_index].node_type = Node.CONDITION_NODE
         self.nodes[node_index].left_child = len(self.nodes)
-        self.nodes.append(self.Node(len(self.nodes)))
+        self.nodes.append(Node())
         self.nodes[node_index].right_child = len(self.nodes)
-        self.nodes.append(self.Node(len(self.nodes)))
+        self.nodes.append(Node())
+        return len(self.nodes) - 2, len(self.nodes) - 1
+
+    def set_node_classification(self, node_index, class_probabilities):
+        self.nodes[node_index].node_type = Node.CLASSIFICATION_NODE
+        self.nodes[node_index].class_probabilities = class_probabilities
+        total = 0.0
+        for value in class_probabilities.values():
+            total += value
+        for key in self.nodes[node_index].class_probabilities.keys():
+            self.nodes[node_index].class_probabilities[key] /= total
+        if self.nodes[node_index].left_child is not None:
+            self.nodes[self.nodes[node_index].left_child].node_type = Node.ZOMBIE_NODE
+        if self.nodes[node_index].right_child is not None:
+            self.nodes[self.nodes[node_index].right_child].node_type = Node.ZOMBIE_NODE
 
     def navigate(self, features):
         current = 0
-        while self.nodes[current].node_type == NON_TERMINAL_NODE:
-            if self.nodes[current].is_in_condition(features):
+        while self.nodes[current].node_type == Node.CONDITION_NODE:
+            if features[self.nodes[current].feature_index] < self.nodes[current].split_threshold:
                 current = self.nodes[current].left_child
             else:
                 current = self.nodes[current].right_child
         return current
 
-    def calc(self, features):
-        return self.nodes[self.navigate(features)].value
+    def navigate_to_node(self, features):
+        return self.nodes[self.navigate(features)]
+
+    def get_next_non_terminal_node(self):
+        for node_index in xrange(len(self.nodes)):
+            if self.nodes[node_index].node_type == Node.NON_TERMINAL_NODE:
+                return node_index
+        return None
 
     def calc_mc(self, features):
-        return self.nodes[self.navigate(features)].class_probabilities
+        return self.navigate_to_node(features).class_probabilities
+
+
+def save_to_file(decision_tree, filepath):
+    pickle.dump(decision_tree, filepath)
+
+def load_from_file(filepath):
+    return pickle.load(filepath)
