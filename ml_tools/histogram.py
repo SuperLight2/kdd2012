@@ -51,18 +51,27 @@ class Histogram(object):
             result += plain[i][1]
         return result
 
+    def get_total_elements(self):
+        result = 0
+        for value in self.histogram.values():
+            result += value
+        return result
+
+    def get_min_max_elements(self):
+        plain = sorted(self.histogram.keys(), key=lambda x: float(x))
+        return plain[0], plain[-1]
+
     def uniform(self, B):
         bins_sum = 0
 
         for value in self.histogram.values():
             bins_sum += value
-        result = [0 for _ in xrange(B - 1)]
+        result = []
         sums = sorted([(x, self.sum(x)) for x in self.histogram.keys()], key=lambda x: float(x[0]))
 
         for j in xrange(B - 1):
             s = 1.0 * (j + 1) * bins_sum / B
             if s > sums[-1][1]:
-                result[j] = result[j - 1]
                 continue
             i = 0
             while (i < len(sums)) and (sums[i][1] < s):
@@ -83,7 +92,7 @@ class Histogram(object):
                 z = 1.0 * d / self.histogram[sums[i][0]]
             else:
                 z = (-b + math.sqrt(b * b - 4 * a * c)) / (2.0 * a)
-            result[j] = sums[i][0] + z * (sums[i + 1][0] - sums[i][0])
+            result.append(sums[i][0] + z * (sums[i + 1][0] - sums[i][0]))
         return result
 
     def normalize(self):
@@ -123,6 +132,13 @@ if __name__ == '__main__':
     print hist3.sum(15.21)
     print hist3.sum(28.98) - hist3.sum(15.21)
     print hist1.sum(1000)
+
+    hist4 = Histogram(bins_count=30)
+    for i in xrange(988):
+        hist4.add(0.5)
+    for i in xrange(12):
+        hist4.add(1.0)
+    print hist4.uniform(10)
 
 
 

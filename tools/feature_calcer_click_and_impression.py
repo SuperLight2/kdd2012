@@ -13,6 +13,6 @@ class FeatureCalcerClickAndImpression(FeatureCalcer):
         clicks / impression
         """
         if instance.clicks == 0:
-            return 0
+            return [0, instance.clicks, instance.impressions]
         else:
-            return 1.0 * instance.clicks / instance.impressions
+            return [1.0 * instance.clicks / instance.impressions, instance.clicks, instance.impressions]
