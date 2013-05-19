@@ -13,21 +13,3 @@ class Node(object):
         self.feature_index = feature_index
         self.split_threshold = split_threshold
         self.class_probabilities = dict()
-
-    """
-        BEGIN_NODE = 'BEGIN_NODE'
-        END_NODE = 'END_NODE'
-
-        def serialize_to_string(self):
-            result = DecisionTree.Node.BEGIN_NODE
-            result += "\nnode_type\t%s" % str(self.node_type)
-            result += "\nleft_child\t%s" % str(self.left_child)
-            result += "\nright_child\t%s" % str(self.right_child)
-            result += "\nfeature_index\t%s" % str(self.feature_index)
-            result += "\nsplit_threshold\t%s" % str(self.split_threshold)
-            result += "\nclass_probabilities\t%s" % str(",".join(map(str, ["%s:%s" % (key, str(value))
-                                                                           for key, value in
-                                                                           self.class_probabilities.iteritems()])))
-            result += "\n" + DecisionTree.Node.END_NODE
-            return result
-    """

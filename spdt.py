@@ -1,6 +1,7 @@
 from optparse import OptionParser
-from ml_tools.spdt_classification import train_classifier_tree
+from ml_tools.spdt_classification import SimpleClassifier
 import math
+from tools.readers import SmartReader
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -36,22 +37,22 @@ def main():
     logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
 
     _logger.debug("Begin training")
-    decision_tree = train_classifier_tree(args[0])
+    classifier_tree = SimpleClassifier().learn(args[0])
     _logger.debug("End training")
 
     if opts.test_features is not None:
         mcll = 0.0
         rc = 0.0
         index = 0
-        for line in open(opts.test_features):
+        for line in SmartReader().open(opts.test_features):
             s = line.strip().split('\t')
             original_cls = s[0]
             features = map(float, s[1:])
             #if index < 10:
             #    _logger.debug("original class: " + str(original_cls))
-            #    _logger.debug("class probabilities: " + str(decision_tree.calc_mc(features)))
-            mcll += multiclass_logloss_metric(original_cls, decision_tree.calc_mc(features))
-            rc += right_classification_metric(original_cls, decision_tree.calc_mc(features))
+            #    _logger.debug("class probabilities: " + str(classifier_tree.calc_mc(features)))
+            mcll += multiclass_logloss_metric(original_cls, classifier_tree.calc_mc(features))
+            rc += right_classification_metric(original_cls, classifier_tree.calc_mc(features))
             index += 1
         mcll /= index
         rc /= index
