@@ -1,5 +1,5 @@
 from smart_reader import SmartReader
-from data_types import Instance, User
+from data_types import Instance, User, Object
 
 
 class UserReader(object):
@@ -26,3 +26,12 @@ class InstanceReader(object):
             if not line.strip():
                 continue
             yield Instance(line)
+
+
+class ObjectReader:
+    def open(self, filename):
+        for line in SmartReader().open(filename):
+            if not line.strip():
+                continue
+            yield Object(line)
+

@@ -4,6 +4,8 @@ from histogram import Histogram
 from impurity import GiniFunction, EntropyFunction
 from regularization import zero, log_regularization
 import random
+from tools.readers import ObjectReader
+from tools.data_types import Object
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -14,6 +16,15 @@ def get_classes_count(data, indexes):
     for index in indexes:
         result[data[index][0]] += 1
     return result
+
+
+def get_class_from_object(learning_object):
+    try:
+        if float(learning_object.clicks) > 0:
+            return '1'
+        return '0'
+    except ValueError:
+        return learning_object.ctr
 
 
 class SimpleClassifier:
@@ -33,13 +44,12 @@ class SimpleClassifier:
         _logger.debug("Reading data")
         index = 0
         features_count = None
-        for line in open(features_filepath):
-            s = line.strip().split('\t')
-            object_class = s[0]
-            features = map(float, s[1:])
+        for current_object in ObjectReader().open(features_filepath):
+            original_class = get_class_from_object(current_object)
+            features = current_object.features
             if features_count is None:
                 features_count = len(features)
-            data.append((object_class, features))
+            data.append((original_class, features))
             node2indexes[current_node_index].append(index)
             index += 1
         _logger.debug("End reading data")
@@ -178,10 +188,9 @@ class SPDTClassifier:
         classes = set()
 
         _logger.debug("Reading data")
-        for line in open(features_filepath):
-            s = line.strip().split('\t')
-            original_class = s[0]
-            features = map(float, s[1:])
+        for current_object in ObjectReader().open(features_filepath):
+            original_class = get_class_from_object(current_object)
+            features = current_object.features
             if features_count is None:
                 features_count = len(features)
             classes.add(original_class)

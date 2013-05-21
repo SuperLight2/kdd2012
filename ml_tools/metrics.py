@@ -62,11 +62,21 @@ class AUC:
         self.predicted_ctr = []
 
     def add(self, clicks, impressions, predicted_ctr):
-        self.num_clicks.append(clicks)
-        self.num_impressions.append(impressions)
-        self.predicted_ctr.append(predicted_ctr)
+        try:
+            float(clicks)
+            float(impressions)
+            float(predicted_ctr)
+        except ValueError:
+            return
+        self.elements_count += 1
+        self.num_clicks.append(float(clicks))
+        self.num_impressions.append(float(impressions))
+        self.predicted_ctr.append(float(predicted_ctr))
 
     def get_result(self):
+        if not self.elements_count:
+            return 0
+
         i_sorted = sorted(range(len(self.predicted_ctr)), key=lambda i: self.predicted_ctr[i], reverse=True)
         auc_temp = 0.0
         click_sum = 0.0
@@ -88,5 +98,5 @@ class AUC:
             no_click_sum += self.num_impressions[i_sorted[i]] - self.num_clicks[i_sorted[i]]
             click_sum += self.num_clicks[i_sorted[i]]
         auc_temp += (click_sum + old_click_sum) * no_click / 2.0
-        auc = auc_temp / (click_sum * no_click_sum)
+        auc = auc_temp / (click_sum * no_click_sum + 1e-15)
         return auc

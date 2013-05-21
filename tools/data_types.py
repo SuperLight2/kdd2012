@@ -61,3 +61,12 @@ class User(object):
             self.queries.append(Query(instance.queryID, instance.query_tokens))
             self.queries_positions[instance.queryID] = len(self.queries)
         self.queries[instance.queryID].add_instance(instance)
+
+
+class Object:
+    def __init__(self, line):
+        s = line.strip().split('\t')
+        self.ctr = s[0]
+        self.clicks = s[1]
+        self.impressions = s[2]
+        self.features = map(float, s[3:])

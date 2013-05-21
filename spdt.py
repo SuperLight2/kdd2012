@@ -1,6 +1,6 @@
 from optparse import OptionParser
-from ml_tools.spdt_classification import SimpleClassifier, SPDTClassifier
-from tools.readers import SmartReader
+from tools.readers import ObjectReader
+from ml_tools.spdt_classification import SimpleClassifier, SPDTClassifier, get_class_from_object
 from ml_tools.metrics import RightClassificationRatio, MulticlassLogloss, MSE, AUC
 
 import logging
@@ -29,15 +29,14 @@ def main():
 
     if opts.test_features is not None:
         index = 0
-        for line in SmartReader().open(opts.test_features):
-            s = line.strip().split('\t')
-            original_cls = s[0]
-            features = map(float, s[1:])
+        for current_object in ObjectReader().open(opts.test_features):
+            original_class = get_class_from_object(current_object)
+            features = current_object.features
             class_probabilities = classifier_tree.calc_mc(features)
 
-            #if index < 10:
-            #    _logger.debug("original class: " + str(original_cls))
-            #    _logger.debug("class probabilities: " + str(class_probabilities))
+            if index < 10:
+                _logger.debug("original class: " + str(original_class))
+                _logger.debug("class probabilities: " + str(class_probabilities))
             result = 0
             try:
                 for key, value in class_probabilities.iteritems():
@@ -45,10 +44,10 @@ def main():
             except ValueError:
                 result = 0
             print result
-            mce_metric.add(original_cls, result)
-            right_classification_ratio_metric.add(original_cls, class_probabilities)
-            mcll_metric.add(original_cls, class_probabilities)
-            auc_metric.add(1, 2, result)
+            mce_metric.add(original_class, result)
+            right_classification_ratio_metric.add(original_class, class_probabilities)
+            mcll_metric.add(original_class, class_probabilities)
+            auc_metric.add(current_object.clicks, current_object.impressions, result)
 
             index += 1
             if index % 100000 == 0:
