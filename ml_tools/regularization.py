@@ -9,4 +9,4 @@ def log_regularization(classes_count):
     total = 0
     for value in classes_count.values():
         total += value
-    return -1.0 / 10 * math.log(1.0 * total / 100)
+    return -0.2 * math.log(1.0 * total / 200)

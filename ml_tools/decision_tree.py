@@ -12,24 +12,19 @@ class DecisionTree(object):
         self.nodes[node_index].split_threshold = split_threshold
         self.nodes[node_index].node_type = Node.CONDITION_NODE
         self.nodes[node_index].left_child = len(self.nodes)
-        self.nodes.append(Node(parent_node=node_index))
+        self.nodes.append(Node())
         self.nodes[node_index].right_child = len(self.nodes)
-        self.nodes.append(Node(parent_node=node_index))
+        self.nodes.append(Node())
         return len(self.nodes) - 2, len(self.nodes) - 1
 
-    def set_node_classification(self, node_index, class_probabilities=None, copy_from_parent=False):
+    def set_node_classification(self, node_index, class_probabilities=None):
         self.nodes[node_index].node_type = Node.CLASSIFICATION_NODE
-        if copy_from_parent:
-            parent_node = self.nodes[node_index].parent_node
-            self.nodes[node_index].class_probabilities = self.nodes[parent_node].class_probabilities
-            return
-        else:
-            self.nodes[node_index].class_probabilities = class_probabilities.copy()
-            total = 0.0
-            for value in class_probabilities.values():
-                total += value
-            for key in self.nodes[node_index].class_probabilities.keys():
-                self.nodes[node_index].class_probabilities[key] /= total
+        self.nodes[node_index].class_probabilities = class_probabilities.copy()
+        total = 0.0
+        for value in class_probabilities.values():
+            total += value
+        for key in self.nodes[node_index].class_probabilities.keys():
+            self.nodes[node_index].class_probabilities[key] /= total
         if self.nodes[node_index].left_child is not None:
             self.nodes[self.nodes[node_index].left_child].node_type = Node.ZOMBIE_NODE
         if self.nodes[node_index].right_child is not None:
@@ -59,6 +54,7 @@ class DecisionTree(object):
 
 def save_to_file(decision_tree, filepath):
     pickle.dump(decision_tree, filepath)
+
 
 def load_from_file(filepath):
     return pickle.load(filepath)

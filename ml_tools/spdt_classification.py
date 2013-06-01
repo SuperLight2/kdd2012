@@ -3,9 +3,7 @@ from collections import defaultdict
 from histogram import Histogram
 from impurity import GiniFunction, EntropyFunction
 from regularization import zero, log_regularization
-import random
 from tools.readers import ObjectReader
-from tools.data_types import Object
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -20,9 +18,8 @@ def get_classes_count(data, indexes):
 
 def get_class_from_object(learning_object):
     try:
-        if float(learning_object.clicks) > 0:
-            return '1'
-        return '0'
+        float(learning_object.clicks)
+        return learning_object.clicks
     except ValueError:
         return learning_object.ctr
 
@@ -170,8 +167,8 @@ class SPDRWorker:
 
 
 class SPDTClassifier:
-    def __init__(self, workers_count=30, discretization=8, alpha=0.8, min_object_in_node=400,
-                 impurity_function=GiniFunction, worker_bins_count=30, regularization=log_regularization):
+    def __init__(self, workers_count=1, discretization=8, alpha=0.8, min_object_in_node=0,
+                 impurity_function=GiniFunction, worker_bins_count=100, regularization=zero):
         self.discretization = discretization
         self.alpha = alpha
         self.min_object_in_node = min_object_in_node
@@ -188,13 +185,15 @@ class SPDTClassifier:
         classes = set()
 
         _logger.debug("Reading data")
+        index = 0
         for current_object in ObjectReader().open(features_filepath):
             original_class = get_class_from_object(current_object)
             features = current_object.features
             if features_count is None:
                 features_count = len(features)
             classes.add(original_class)
-            workers[random.randint(0, self.workers_count - 1)].add_object(original_class, features)
+            workers[index].add_object(original_class, features)
+            index = (index + 1) % self.workers_count
         _logger.debug("End reading data")
 
         while decision_tree.get_next_non_terminal_node() is not None:
