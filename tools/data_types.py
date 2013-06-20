@@ -70,3 +70,7 @@ class Object:
         self.clicks = s[1]
         self.impressions = s[2]
         self.features = map(float, s[3:])
+        #alpha = 0.8
+        #for feature in [23, 26, 29, 32, 35, 38, 41, 44, 47, 50, 53, 56]:
+        #    self.features[feature] = alpha * self.features[feature] + (1 - alpha) * 0.5
+            #self.features[feature] = 0

@@ -4,6 +4,7 @@ from histogram import Histogram
 from impurity import GiniFunction, EntropyFunction
 from regularization import zero, log_regularization
 from tools.readers import ObjectReader
+import time
 
 import logging
 _logger = logging.getLogger(__name__)
@@ -18,14 +19,15 @@ def get_classes_count(data, indexes):
 
 def get_class_from_object(learning_object):
     try:
-        float(learning_object.clicks)
-        return learning_object.clicks
+        #float(learning_object.clicks)
+        return learning_object.ctr
+
     except ValueError:
         return learning_object.ctr
 
 
 class SimpleClassifier:
-    def __init__(self, discretization=8, alpha=0.9, min_object_in_node=-1, impurity_function=EntropyFunction):
+    def __init__(self, discretization=8, alpha=0.9, min_object_in_node=400, impurity_function=GiniFunction):
         self.discretization = discretization
         self.alpha = alpha
         self.min_object_in_node = min_object_in_node
@@ -167,8 +169,8 @@ class SPDRWorker:
 
 
 class SPDTClassifier:
-    def __init__(self, workers_count=1, discretization=8, alpha=0.8, min_object_in_node=0,
-                 impurity_function=GiniFunction, worker_bins_count=100, regularization=zero):
+    def __init__(self, workers_count=5, discretization=8, alpha=0.01, min_object_in_node=400,
+                 impurity_function=GiniFunction, worker_bins_count=20, regularization=zero, info_filepath=None):
         self.discretization = discretization
         self.alpha = alpha
         self.min_object_in_node = min_object_in_node
@@ -176,8 +178,18 @@ class SPDTClassifier:
         self.workers_count = workers_count
         self.worker_bins_count = worker_bins_count
         self.regularization = regularization
+        self.info_filepath = info_filepath
 
     def learn(self, features_filepath):
+        start_time = time.time()
+        k1 = 0
+        block1_time = 0
+        k2 = 0
+        block2_time = 0
+
+        features_used = dict()
+
+
         decision_tree = DecisionTree()
         workers = [SPDRWorker(self.worker_bins_count) for _ in xrange(self.workers_count)]
         original_G = None
@@ -219,8 +231,13 @@ class SPDTClassifier:
                 classes_in_node_index[class_key] = histograms[0][class_key].get_total_elements()
                 total_elements += histograms[0][class_key].get_total_elements()
             _logger.debug("Total elements: " + str(total_elements))
+
+            k1 += 1
+            cur_time = time.time()
             for worker in workers:
                 worker.clear_histograms(current_node_index)
+            block1_time += time.time() - cur_time
+
             decision_tree.set_node_classification(current_node_index, classes_in_node_index)
             if not total_elements:
                 raise BaseException("Fuck!")
@@ -268,6 +285,35 @@ class SPDTClassifier:
 
             if (max_delta is not None) or (max_delta > 0):
                 decision_tree.split_node(current_node_index, best_feature_index, best_split_threshold)
+                if best_feature_index not in features_used:
+                    features_used[best_feature_index] = 0
+                features_used[best_feature_index] += 1
+
+                k2 += 1
+                cur_time = time.time()
                 for worker in workers:
                     worker.split_node(current_node_index, best_feature_index, best_split_threshold)
+                block2_time += time.time() - cur_time
+
+        _logger.info(features_used)
+
+        total_time = time.time() - start_time
+        _logger.info("Total time: " + str(total_time))
+        _logger.info("k1: " + str(k1))
+        _logger.info("block1 time: " + str(block1_time))
+        _logger.info("k2: " + str(k2))
+        _logger.info("block2 time: " + str(block2_time))
+        parallel_time = (total_time - block1_time - block2_time) + (block1_time + block2_time) / self.workers_count
+        _logger.info("Parallel time: " + str(parallel_time))
+        _logger.info("Acceleration: " + str(total_time / parallel_time))
+        _logger.info("Efficiency: " + str(total_time / parallel_time / self.workers_count))
+        _logger.info("Workers count: " + str(self.workers_count))
+        _logger.info("Bins count: " + str(self.worker_bins_count))
+        if self.info_filepath is not None:
+            print >> self.info_filepath, "\t".join(map(str, [total_time, k1, block1_time, k2, block2_time,
+                                                             parallel_time,
+                                                             total_time / parallel_time,
+                                                             total_time / parallel_time / self.workers_count,
+                                                             self.workers_count, self.worker_bins_count]))
+
         return decision_tree
